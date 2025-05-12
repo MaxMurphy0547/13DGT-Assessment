@@ -1,4 +1,5 @@
 import pygame
+import time
 pygame.init()
 
 screen = pygame.display.set_mode((650, 800))
@@ -26,23 +27,62 @@ def game_loop():
     quit_game = False
     car_x = 280
     car_y = 750
+    car_x_change = 0
+    car_y_change = 0
     
 
     while not quit_game:
+        dt = clock.tick(40) / 1000 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                quit_game = true
+                quit_game = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
                     quit()
-        
+                elif event.key == pygame.K_SPACE:
+                    if car_y == 750:
+                        car_y_change = -20
+                        car_x_change = 0
+                elif event.key == pygame.K_LEFT:
+                        car_x_change = -20
+                        car_y_change = 0
+                elif event.key == pygame.K_RIGHT:
+                        car_x_change = 20
+                        car_y_change = 0
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    car_x_change = 0
+                    car_y_change = 0
+                elif event.key == pygame.K_RIGHT:
+                    car_x_change = 0
+                    car_y_change = 0
+
+
         screen.fill(white)
         screen.blit(map_image, (0, 0))
         screen.blit(car_image, (car_x, car_y))
+        car_x += car_x_change 
+        car_y += car_y_change
+        
+        print (car_x)
+        print (car_y)
+        
+        if car_y < 600:
+            car_y_change = 0
+        if car_x == 80 or car_x == 480:
+            car_x_change = 0
+                
+  
+            
+
+
+
+        
+
         
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(40)
 
 
 
