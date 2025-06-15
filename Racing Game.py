@@ -10,7 +10,10 @@ pygame.display.set_caption("2D Car Racing Game")
 
 clock = pygame.time.Clock()
 font = pygame.font.Font("freesansbold.ttf", 40)
+death_font = pygame.font.Font("freesansbold.ttf", 30)
 
+
+white = (255, 255, 255)
 black = (0, 0, 0)
 
 car_image = pygame.image.load('player_car.png')
@@ -107,6 +110,18 @@ def start_message(msg, text_colour):
     text_box = txt.get_rect(center=(325, 100))
     screen.blit(txt, text_box)
 
+def load_high_score():
+    try:
+        with open("HI_score_Racing.txt", 'r') as hi_score_file:
+            return int(hi_score_file.read())
+    except:
+        return 0 
+
+def save_high_score(high_score):
+    with open("HI_score_Racing.txt", 'w') as hi_score_file:
+        hi_score_file.write(str(high_score))
+
+
 def score_message(msg, text_colour):
     txt = font.render(msg, True, text_colour)
     text_box = txt.get_rect(center=(150, 50))
@@ -116,6 +131,12 @@ def high_score_message(msg, text_colour):
     txt = font.render(msg, True, text_colour)
     text_box = txt.get_rect(center=(500, 50))
     screen.blit(txt, text_box)
+
+def death_message(msg, text_colour):
+    txt = death_font.render(msg, True, text_colour)
+    text_box = txt.get_rect(center=(325, 400))
+    screen.blit(txt, text_box)
+
 
 def game_loop():
     quit_game = False
@@ -128,7 +149,7 @@ def game_loop():
     initial_speed = 20
     start = False
     score = 0
-    high_score = 0
+    high_score = load_high_score()
 
     background = MovingBackground(map_image, 0)
     traffic_list = generate_traffic()
@@ -142,16 +163,16 @@ def game_loop():
             if event.type == pygame.QUIT:
                 quit_game = True
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+                elif event.key == pygame.K_SPACE:
                     if car_y == 750:
                         start = True
                         car_y_change = -20
                 elif start:
                     if car_y <= y_start_position:
-                        if event.key == pygame.K_q:
-                            pygame.quit()
-                            quit()
-                        elif event.key == pygame.K_LEFT:
+                        if event.key == pygame.K_LEFT:
                             car_x_change = -15
                         elif event.key == pygame.K_RIGHT:
                             car_x_change = 15
@@ -186,17 +207,48 @@ def game_loop():
         else:
             car_x += car_x_change
 
+        player_rect = pygame.Rect(car_x, car_y, car_image.get_width(), car_image.get_height())
+        for car in traffic_list:
+            traffic_rect = pygame.Rect(car.x, car.y, car.image.get_width(), car.image.get_height())
+            if player_rect.colliderect(traffic_rect):
+                quit_game = True
+        
         background.draw()
         for car in traffic_list:
             car.draw()
 
         screen.blit(car_image, (car_x, car_y))
         
-        score_message(f"Score: {score}", black)
-        high_score_message(f"High Score: {high_score}", black)
+        if start:
+            score_text = "Score: " + str(score)
+            score_message(score_text, black)
+            high_score_text = "High Score: " + str(high_score)
+            high_score_message(high_score_text, black)
+
 
         pygame.display.update()
         clock.tick(40)
+
+    save_high_score(high_score)
+    
+    screen.fill (black)
+    death_message("You died, Press R to Play Again Or Q To Quit", white)
+    pygame.display.update()
+
+
+
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+                elif event.key == pygame.K_r:
+                    game_loop()
 
 
 game_loop()
