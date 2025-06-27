@@ -152,6 +152,7 @@ def game_loop():
     current_speed = 0
     initial_speed = 20
     start = False
+    new_high_score = False
     score = 0
     high_score = load_high_score()
     
@@ -210,6 +211,8 @@ def game_loop():
         # updates high score
         if score > high_score:
             high_score = score
+            new_high_score = True
+        
             
         # stop car from moving past edge of the road (yellow line on the map)
         if car_x + car_x_change < 80:
@@ -242,16 +245,27 @@ def game_loop():
 
         pygame.display.update()
         clock.tick(40) # limit to 40fps
+    
+    
+    
+    # saves high score and display death screen
+    if new_high_score == True:
+        save_high_score(high_score)
+        screen.fill (black)
+        message("You Died", white, 325, 300, death_font)
+        message("New High Score! Your New High Score is " + str(high_score), white, 325, 400, death_other_font) 
+        message("Press R to Play Again Or Q To Quit", white, 325, 440, death_other_font)
+        pygame.display.update()
+        
+    else:
+        save_high_score(high_score)
+        screen.fill (black)
+        message("You Died", white, 325, 300, death_font)
+        message("your score was " + str(score) + " your high score is " + str(high_score), white, 325, 400, death_other_font) 
+        message("Press R to Play Again Or Q To Quit", white, 325, 440, death_other_font)
+        pygame.display.update()
 
-    # saves high score and display death screen 
-    save_high_score(high_score)
-    screen.fill (black)
-    message("You Died", white, 325, 300, death_font)
-    message("your score was " + str(score) + " your high score is " + str(high_score), white, 325, 400, death_other_font_) 
-    message("Press R to Play Again Or Q To Quit", white, 325, 440, death_other_font)
-    pygame.display.update()
-
-
+        
     # allows player to quit or restart after death
     waiting_for_input = True
     while waiting_for_input:
