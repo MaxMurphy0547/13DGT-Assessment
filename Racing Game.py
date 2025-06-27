@@ -13,7 +13,8 @@ pygame.display.set_caption("2D Car Racing Game")
 # clock and fonts
 clock = pygame.time.Clock()
 font = pygame.font.Font("freesansbold.ttf", 40)
-death_font = pygame.font.Font("freesansbold.ttf", 30)
+death_font = pygame.font.Font("freesansbold.ttf", 80)
+death_other_font = pygame.font.Font("freesansbold.ttf", 30)
 
 # colors
 white = (255, 255, 255)
@@ -133,22 +134,12 @@ def save_high_score(high_score):
     # saves high score the the file
     with open("HI_score_Racing.txt", 'w') as hi_score_file:
         hi_score_file.write(str(high_score))
-
-
-def score_message(msg, text_colour):
-    txt = font.render(msg, True, text_colour)
-    text_box = txt.get_rect(center=(150, 50))
+        
+def message(msg, text_colour, x, y, font_type):
+    txt = font_type.render(msg, True, text_colour)
+    text_box = txt.get_rect(center=(x, y))
     screen.blit(txt, text_box)
 
-def high_score_message(msg, text_colour):
-    txt = font.render(msg, True, text_colour)
-    text_box = txt.get_rect(center=(500, 50))
-    screen.blit(txt, text_box)
-
-def death_message(msg, text_colour):
-    txt = death_font.render(msg, True, text_colour)
-    text_box = txt.get_rect(center=(325, 400))
-    screen.blit(txt, text_box)
 
 # game loop
 def game_loop():
@@ -163,15 +154,12 @@ def game_loop():
     start = False
     score = 0
     high_score = load_high_score()
-
+    
     background = MovingBackground(map_image, 0)
     traffic_list = generate_traffic()
 
     while not quit_game:
-        # displays start message if game has not started
-        if not start:
-            start_message("Press Space To Start", black)
-            pygame.display.update()
+        # FPS
         dt = clock.tick(40) / 1000 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -194,7 +182,7 @@ def game_loop():
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     car_x_change = 0
 
-        # animation of car starting to drive onto the track
+        # animation of car starting to drive onto the road
         if car_y > y_start_position:
             car_y += car_y_change
             if car_y <= y_start_position:
@@ -238,19 +226,19 @@ def game_loop():
             if player_rect.colliderect(traffic_rect):
                 quit_game = True
 
-        # draw the brackground and cars
         background.draw()
-        for car in traffic_list:
-            car.draw()
-        screen.blit(car_image, (car_x, car_y))
-
-        #  loads score and high score once game is started
-        if start:
-            score_text = "Score: " + str(score)
-            score_message(score_text, black)
-            high_score_text = "High Score: " + str(high_score)
-            high_score_message(high_score_text, black)
-
+            
+        # displays start message if game has not started
+        if not start:
+            message("Press Space To Start", black, 325, 100, font)
+        else:
+            # draw traffic and car only when game has started
+            for car in traffic_list:
+                car.draw()
+            screen.blit(car_image, (car_x, car_y))
+            # loads score and high score once game is started
+            message("Score: " + str(score), black, 120, 50, font)
+            message("High Score: " + str(high_score), black, 500, 50, font)
 
         pygame.display.update()
         clock.tick(40) # limit to 40fps
@@ -258,7 +246,9 @@ def game_loop():
     # saves high score and display death screen 
     save_high_score(high_score)
     screen.fill (black)
-    death_message("You died, Press R to Play Again Or Q To Quit", white)
+    message("You Died", white, 325, 300, death_font)
+    message("your score was " + str(score) + " your high score is " + str(high_score), white, 325, 400, death_other_font_) 
+    message("Press R to Play Again Or Q To Quit", white, 325, 440, death_other_font)
     pygame.display.update()
 
 
@@ -278,3 +268,7 @@ def game_loop():
 
 
 game_loop()
+
+
+
+
