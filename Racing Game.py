@@ -166,10 +166,7 @@ def game_loop():
             if event.type == pygame.QUIT:
                 quit_game = True
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    pygame.quit()
-                    quit()
-                elif event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:
                     if car_y == 750: # stops player from pressing space when not in starting position
                         start = True
                         car_y_change = -20
